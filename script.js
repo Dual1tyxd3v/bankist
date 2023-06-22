@@ -85,3 +85,9 @@ const createUserNames = (accounts) => {
 
 createUserNames(accounts);
 console.log(accounts);
+
+const displayDeposit = (deposits) => {
+  labelBalance.textContent = deposits.reduce((a, v) => a + v) + ' EUR';
+};
+
+displayDeposit(account1.movements);
