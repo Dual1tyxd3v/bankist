@@ -33,8 +33,6 @@ const account4 = {
   pin: 4444,
 };
 
-const interest = 1.2 / 100;
-
 const accounts = [account1, account2, account3, account4];
 
 // Elements
@@ -77,8 +75,6 @@ const displayMovements = (movements) => {
   });
 };
 
-displayMovements(account1.movements);
-
 const createUserNames = (accounts) => {
   accounts.forEach(acc => {
     acc.userName = acc.owner.toLowerCase().split(' ').map(word => word[0]).join('');
@@ -91,16 +87,29 @@ const displayDeposit = (deposits) => {
   labelBalance.textContent = deposits.reduce((a, v) => a + v) + ' €';
 };
 
-displayDeposit(account1.movements);
-
-const displayTotalStat = (movements) => {
+const displayTotalStat = ({movements, interestRate}) => {
   labelSumIn.textContent = movements.filter(mov => mov > 0).reduce((a, b) => a + b) + '€';
   labelSumOut.textContent = movements.filter(mov => mov < 0).reduce((a, b) => a + b) + '€';
   labelSumInterest.textContent = movements
     .filter(mov => mov > 0)
-    .map(mov => mov * interest)
+    .map(mov => mov * interestRate / 100)
     .filter(mov => mov >= 1)
     .reduce((a, b) => a + b) + '€';
 };
 
-displayTotalStat(account1.movements);
+let currentUser;
+
+btnLogin.addEventListener('click', (e) => {
+  e.preventDefault();
+  
+  currentUser = accounts.find(user => user.userName === inputLoginUsername.value);
+  if (currentUser?.pin !== +inputLoginPin.value) return;
+  containerApp.style.opacity = 1;
+
+  inputLoginUsername.value = inputLoginPin.value = '';
+  inputLoginPin.blur();
+  
+  displayDeposit(currentUser.movements);
+  displayMovements(currentUser.movements);
+  displayTotalStat(currentUser);
+});
