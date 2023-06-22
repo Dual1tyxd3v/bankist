@@ -138,3 +138,15 @@ btnTransfer.addEventListener('click', (e) => {
 
   updateUI(currentUser);
 });
+
+btnClose.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  if (inputCloseUsername.value !== currentUser.userName || +inputClosePin.value !== currentUser.pin) return;
+  const index = accounts.findIndex(user => user.userName === currentUser.userName);
+ 
+  accounts.splice(index, 1);
+  currentUser = null;
+  labelWelcome.textContent = 'Log in to get started';
+  containerApp.style.opacity = 0;
+});
