@@ -33,6 +33,8 @@ const account4 = {
   pin: 4444,
 };
 
+const interest = 1.2 / 100;
+
 const accounts = [account1, account2, account3, account4];
 
 // Elements
@@ -69,7 +71,7 @@ const displayMovements = (movements) => {
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${i} ${type}</div>
       <div class="movements__date">3 days ago</div>
-      <div class="movements__value">${move}</div>
+      <div class="movements__value">${move}€</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
@@ -84,10 +86,21 @@ const createUserNames = (accounts) => {
 };
 
 createUserNames(accounts);
-console.log(accounts);
 
 const displayDeposit = (deposits) => {
-  labelBalance.textContent = deposits.reduce((a, v) => a + v) + ' EUR';
+  labelBalance.textContent = deposits.reduce((a, v) => a + v) + ' €';
 };
 
 displayDeposit(account1.movements);
+
+const displayTotalStat = (movements) => {
+  labelSumIn.textContent = movements.filter(mov => mov > 0).reduce((a, b) => a + b) + '€';
+  labelSumOut.textContent = movements.filter(mov => mov < 0).reduce((a, b) => a + b) + '€';
+  labelSumInterest.textContent = movements
+    .filter(mov => mov > 0)
+    .map(mov => mov * interest)
+    .filter(mov => mov >= 1)
+    .reduce((a, b) => a + b) + '€';
+};
+
+displayTotalStat(account1.movements);
