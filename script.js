@@ -150,3 +150,14 @@ btnClose.addEventListener('click', (e) => {
   labelWelcome.textContent = 'Log in to get started';
   containerApp.style.opacity = 0;
 });
+
+btnLoan.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const amount = +inputLoanAmount.value;
+  if (amount <= 0 || !currentUser.movements.some(mov => mov >= amount * 0.1)) return;
+
+  currentUser.movements.push(amount);
+  inputLoanAmount.value = '';
+  updateUI(currentUser);
+});
