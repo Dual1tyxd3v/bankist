@@ -71,7 +71,7 @@ const displayMovements = (movs, sort = false) => {
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${i} ${type}</div>
       <div class="movements__date">3 days ago</div>
-      <div class="movements__value">${move}€</div>
+      <div class="movements__value">${move.toFixed(2)}€</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
@@ -87,17 +87,17 @@ createUserNames(accounts);
 
 const displayDeposit = (acc) => {
   acc.balance = acc.movements.reduce((a, v) => a + v);
-  labelBalance.textContent = `${acc.balance} €`;
+  labelBalance.textContent = `${acc.balance.toFixed(2)} €`;
 };
 
 const displayTotalStat = ({movements, interestRate}) => {
-  labelSumIn.textContent = movements.filter(mov => mov > 0).reduce((a, b) => a + b) + '€';
-  labelSumOut.textContent = movements.filter(mov => mov < 0).reduce((a, b) => a + b) + '€';
+  labelSumIn.textContent = movements.filter(mov => mov > 0).reduce((a, b) => a + b).toFixed(2) + '€';
+  labelSumOut.textContent = movements.filter(mov => mov < 0).reduce((a, b) => a + b).toFixed(2) + '€';
   labelSumInterest.textContent = movements
     .filter(mov => mov > 0)
     .map(mov => mov * interestRate / 100)
     .filter(mov => mov >= 1)
-    .reduce((a, b) => a + b) + '€';
+    .reduce((a, b) => a + b).toFixed(2) + '€';
 };
 
 let currentUser;
