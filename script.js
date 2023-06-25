@@ -47,8 +47,8 @@ const account1 = {
     '2020-04-01T10:17:24.185Z',
     '2020-05-08T14:11:59.604Z',
     '2020-05-27T17:01:17.194Z',
-    '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2023-06-20T23:36:17.929Z',
+    '2023-06-24T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -101,25 +101,33 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const getHumanDate = (date) => ({
-  day: date.getDate().toString().padStart(2, '0'),
-  month: (date.getMonth() + 1).toString().padStart(2, '0'),
-  year: date.getFullYear(),
-  hours: date.getHours().toString().padStart(2, '0'),
-  minutes: date.getMinutes().toString().padStart(2, '0'),
-});
+const getHumanDate = (date) => {
+  const result = {
+    day: date.getDate().toString().padStart(2, '0'),
+    month: (date.getMonth() + 1).toString().padStart(2, '0'),
+    year: date.getFullYear(),
+    hours: date.getHours().toString().padStart(2, '0'),
+    minutes: date.getMinutes().toString().padStart(2, '0'),
+  };
 
-const displayMovements = ({movements: movs, movementsDates}, sort = false) => {
+  const daysDifference = Math.round(Math.abs(new Date() - date) / (1000 * 60 * 60 * 24));
+  if (daysDifference === 0) return {...result, formated: 'Today'};
+  if (daysDifference === 1) return {...result, formated: 'Yesterday'};
+  if (daysDifference <= 7 ) return {...result, formated: `${daysDifference} days ago`};
+  return {...result, formated: `${result.day}/${result.month}/${result.year}`};
+};
+
+const displayMovements = ({ movements: movs, movementsDates }, sort = false) => {
   const movements = sort ? movs.slice().sort((a, b) => a - b) : movs;
 
   containerMovements.innerHTML = '';
   movements.forEach((move, i) => {
-    const {day, month, year} = getHumanDate(new Date(movementsDates[i]));
+    const { formated } = getHumanDate(new Date(movementsDates[i]));
     const type = move > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${i} ${type}</div>
-      <div class="movements__date">${day}/${month}/${year}</div>
+      <div class="movements__date">${formated}</div>
       <div class="movements__value">${move.toFixed(2)}€</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -139,7 +147,7 @@ const displayDeposit = (acc) => {
   labelBalance.textContent = `${acc.balance.toFixed(2)} €`;
 };
 
-const displayTotalStat = ({movements, interestRate}) => {
+const displayTotalStat = ({ movements, interestRate }) => {
   labelSumIn.textContent = movements.filter(mov => mov > 0).reduce((a, b) => a + b).toFixed(2) + '€';
   labelSumOut.textContent = movements.filter(mov => mov < 0).reduce((a, b) => a + b).toFixed(2) + '€';
   labelSumInterest.textContent = movements
@@ -152,7 +160,7 @@ const displayTotalStat = ({movements, interestRate}) => {
 let currentUser;
 
 const updateUI = (acc) => {
-  const {day, month, year, hours, minutes} = getHumanDate(new Date());
+  const { day, month, year, hours, minutes } = getHumanDate(new Date());
   labelDate.textContent = `As of ${day}/${month}/${year} ${hours}:${minutes}`;
 
   displayDeposit(acc);
@@ -162,7 +170,7 @@ const updateUI = (acc) => {
 
 btnLogin.addEventListener('click', (e) => {
   e.preventDefault();
-  
+
   currentUser = accounts.find(user => user.userName === inputLoginUsername.value);
   if (currentUser?.pin !== +inputLoginPin.value) return;
   containerApp.style.opacity = 1;
@@ -175,7 +183,7 @@ btnLogin.addEventListener('click', (e) => {
 });
 
 btnTransfer.addEventListener('click', (e) => {
-  e.preventDefault(); 
+  e.preventDefault();
 
   const amount = +(inputTransferAmount.value);
   const targetUser = accounts.find(user => user.userName === inputTransferTo.value);
@@ -200,7 +208,7 @@ btnClose.addEventListener('click', (e) => {
 
   if (inputCloseUsername.value !== currentUser.userName || +inputClosePin.value !== currentUser.pin) return;
   const index = accounts.findIndex(user => user.userName === currentUser.userName);
- 
+
   accounts.splice(index, 1);
   currentUser = null;
   labelWelcome.textContent = 'Log in to get started';
