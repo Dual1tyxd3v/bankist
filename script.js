@@ -105,12 +105,18 @@ const getHumanDate = (date, locale) => {
   const daysDifference = Math.round(Math.abs(new Date() - date) / (1000 * 60 * 60 * 24));
   if (daysDifference === 0) return 'Today';
   if (daysDifference === 1) return 'Yesterday';
-  if (daysDifference <= 7 ) return `${daysDifference} days ago`;
+  if (daysDifference <= 7) return `${daysDifference} days ago`;
 
-  return Intl.DateTimeFormat(locale).format(date);
+  return new Intl.DateTimeFormat(locale).format(date);
 };
 
-const displayMovements = ({ movements: movs, movementsDates, locale }, sort = false) => {
+const formatCurrency = (value, locale, currency) => {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency', currency
+  }).format(value);
+};
+
+const displayMovements = ({ movements: movs, movementsDates, locale, currency }, sort = false) => {
   const movements = sort ? movs.slice().sort((a, b) => a - b) : movs;
 
   containerMovements.innerHTML = '';
@@ -121,7 +127,7 @@ const displayMovements = ({ movements: movs, movementsDates, locale }, sort = fa
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${i} ${type}</div>
       <div class="movements__date">${formated}</div>
-      <div class="movements__value">${move.toFixed(2)}€</div>
+      <div class="movements__value">${formatCurrency(move, locale, currency)}</div>
     </div>`;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
@@ -137,23 +143,24 @@ createUserNames(accounts);
 
 const displayDeposit = (acc) => {
   acc.balance = acc.movements.reduce((a, v) => a + v);
-  labelBalance.textContent = `${acc.balance.toFixed(2)} €`;
+  labelBalance.textContent = `${formatCurrency(acc.balance, acc.locale, acc.currency)}`;
 };
 
-const displayTotalStat = ({ movements, interestRate }) => {
-  labelSumIn.textContent = movements.filter(mov => mov > 0).reduce((a, b) => a + b).toFixed(2) + '€';
-  labelSumOut.textContent = movements.filter(mov => mov < 0).reduce((a, b) => a + b).toFixed(2) + '€';
-  labelSumInterest.textContent = movements
+const displayTotalStat = ({ movements, interestRate, currency, locale }) => {
+  labelSumIn.textContent = formatCurrency(movements.filter(mov => mov > 0).reduce((a, b) => a + b), locale, currency);
+  labelSumOut.textContent = formatCurrency(movements.filter(mov => mov < 0).reduce((a, b) => a + b), locale, currency);
+  const interest = movements
     .filter(mov => mov > 0)
     .map(mov => mov * interestRate / 100)
     .filter(mov => mov >= 1)
-    .reduce((a, b) => a + b).toFixed(2) + '€';
+    .reduce((a, b) => a + b);
+  labelSumInterest.textContent = formatCurrency(interest, locale, currency);
 };
 
 let currentUser;
 
 const updateUI = (acc) => {
-  labelDate.textContent = `As of ${Intl.DateTimeFormat(acc.locale).format(new Date())}`;
+  labelDate.textContent = `As of ${new Intl.DateTimeFormat(acc.locale).format(new Date())}`;
 
   displayDeposit(acc);
   displayMovements(acc);
