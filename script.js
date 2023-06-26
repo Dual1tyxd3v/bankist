@@ -51,7 +51,7 @@ const account1 = {
     '2023-06-24T10:51:36.790Z',
   ],
   currency: 'EUR',
-  locale: 'pt-PT', // de-DE
+  locale: 'ru-RU', // de-DE
 };
 
 const account2 = {
@@ -101,28 +101,21 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const getHumanDate = (date) => {
-  const result = {
-    day: date.getDate().toString().padStart(2, '0'),
-    month: (date.getMonth() + 1).toString().padStart(2, '0'),
-    year: date.getFullYear(),
-    hours: date.getHours().toString().padStart(2, '0'),
-    minutes: date.getMinutes().toString().padStart(2, '0'),
-  };
-
+const getHumanDate = (date, locale) => {
   const daysDifference = Math.round(Math.abs(new Date() - date) / (1000 * 60 * 60 * 24));
-  if (daysDifference === 0) return {...result, formated: 'Today'};
-  if (daysDifference === 1) return {...result, formated: 'Yesterday'};
-  if (daysDifference <= 7 ) return {...result, formated: `${daysDifference} days ago`};
-  return {...result, formated: `${result.day}/${result.month}/${result.year}`};
+  if (daysDifference === 0) return 'Today';
+  if (daysDifference === 1) return 'Yesterday';
+  if (daysDifference <= 7 ) return `${daysDifference} days ago`;
+
+  return Intl.DateTimeFormat(locale).format(date);
 };
 
-const displayMovements = ({ movements: movs, movementsDates }, sort = false) => {
+const displayMovements = ({ movements: movs, movementsDates, locale }, sort = false) => {
   const movements = sort ? movs.slice().sort((a, b) => a - b) : movs;
 
   containerMovements.innerHTML = '';
   movements.forEach((move, i) => {
-    const { formated } = getHumanDate(new Date(movementsDates[i]));
+    const formated = getHumanDate(new Date(movementsDates[i]), locale);
     const type = move > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
@@ -160,8 +153,7 @@ const displayTotalStat = ({ movements, interestRate }) => {
 let currentUser;
 
 const updateUI = (acc) => {
-  const { day, month, year, hours, minutes } = getHumanDate(new Date());
-  labelDate.textContent = `As of ${day}/${month}/${year} ${hours}:${minutes}`;
+  labelDate.textContent = `As of ${Intl.DateTimeFormat(acc.locale).format(new Date())}`;
 
   displayDeposit(acc);
   displayMovements(acc);
