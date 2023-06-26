@@ -116,6 +116,24 @@ const formatCurrency = (value, locale, currency) => {
   }).format(value);
 };
 
+const getLogoutTimer = () => {
+  let seconds = 20;
+  function tick() {
+    labelTimer.textContent = new Intl.DateTimeFormat('en-US', {
+      minute: '2-digit', second: '2-digit'
+    }).format(new Date(seconds * 1000));
+    if (!seconds) {
+      containerApp.style.opacity = 0
+      clearInterval(timer);
+    }
+    seconds--;
+  }
+  tick();
+  const timer = setInterval(tick, 1000);
+
+  return timer;
+};
+
 const displayMovements = ({ movements: movs, movementsDates, locale, currency }, sort = false) => {
   const movements = sort ? movs.slice().sort((a, b) => a - b) : movs;
 
@@ -157,10 +175,12 @@ const displayTotalStat = ({ movements, interestRate, currency, locale }) => {
   labelSumInterest.textContent = formatCurrency(interest, locale, currency);
 };
 
-let currentUser;
+let currentUser, timer;
 
 const updateUI = (acc) => {
   labelDate.textContent = `As of ${new Intl.DateTimeFormat(acc.locale).format(new Date())}`;
+  if (timer) clearInterval(timer);
+  timer = getLogoutTimer();
 
   displayDeposit(acc);
   displayMovements(acc);
